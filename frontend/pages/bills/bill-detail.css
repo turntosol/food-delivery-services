@@ -22,20 +22,28 @@
     justify-content: space-between;
     align-items: center;
     gap: 20px;
+    width: 100%;
+    min-width: 0;
+    margin-top: 25px;
     margin-bottom: 25px;
+}
+
+.bill-detail-header > div {
+    min-width: 0;
 }
 
 .bill-detail-header h2 {
     margin: 0 0 6px;
     font-size: 22px;
     line-height: 1.3;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 .bill-detail-id {
+    margin: 0;
     color: #777;
     font-size: 14px;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 .bill-detail-status {
@@ -49,14 +57,15 @@
 
 .bill-detail-grid {
     display: grid;
-
-    grid-template-columns:
-        minmax(0, 2fr)
-        minmax(280px, 1fr);
-
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
     gap: 25px;
     align-items: start;
     width: 100%;
+    min-width: 0;
+}
+
+.bill-detail-grid > div {
+    min-width: 0;
 }
 
 .bill-detail-card {
@@ -64,16 +73,14 @@
     min-width: 0;
     padding: 24px;
     margin-bottom: 20px;
-    background: #fff;
+    background-color: var(--whiteColor);
     border-radius: 12px;
-
-    box-shadow:
-        0 4px 20px
-        rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
 }
 
 .bill-detail-card h3 {
-    margin-bottom: 20px;
+    margin: 0 0 20px;
     font-size: 18px;
     line-height: 1.4;
 }
@@ -82,9 +89,11 @@
     display: flex;
     align-items: center;
     gap: 15px;
+    width: 100%;
     min-width: 0;
     padding: 15px 0;
     border-bottom: 1px solid #eee;
+    box-sizing: border-box;
 }
 
 .detail-item:last-child {
@@ -92,7 +101,7 @@
 }
 
 .detail-item-image {
-    flex-shrink: 0;
+    flex: 0 0 75px;
     width: 75px;
     height: 75px;
     object-fit: cover;
@@ -100,26 +109,27 @@
 }
 
 .detail-item-info {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
 }
 
 .detail-item-info h4 {
-    margin-bottom: 5px;
+    margin: 0 0 5px;
     font-size: 15px;
     line-height: 1.4;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 .detail-item-info p {
+    margin: 0;
     color: #777;
     font-size: 13px;
     line-height: 1.5;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 .detail-item-price {
-    flex-shrink: 0;
+    flex: 0 0 auto;
     font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
@@ -128,30 +138,45 @@
 .detail-info-row {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     gap: 20px;
+    width: 100%;
+    min-width: 0;
     margin-bottom: 15px;
 }
 
+.detail-info-row:last-child {
+    margin-bottom: 0;
+}
+
 .detail-info-label {
-    flex-shrink: 0;
+    flex: 0 0 auto;
     color: #777;
     font-size: 13px;
 }
 
 .detail-info-value {
+    flex: 1 1 auto;
     min-width: 0;
     text-align: right;
     font-size: 14px;
     font-weight: 500;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 .detail-summary-row {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 20px;
+    width: 100%;
     margin-bottom: 12px;
     font-size: 14px;
+}
+
+.detail-summary-row span:last-child {
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .detail-summary-row.delivery {
@@ -161,6 +186,7 @@
 .detail-summary-total {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 20px;
     padding-top: 15px;
     margin-top: 15px;
@@ -169,22 +195,32 @@
     font-weight: 700;
 }
 
+.detail-summary-total strong {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
 .order-timeline {
     position: relative;
     display: flex;
     justify-content: space-between;
-    margin-top: 30px;
+    align-items: flex-start;
     width: 100%;
+    max-width: 650px;
+    margin: 30px auto 0;
+    padding: 0 5px;
+    box-sizing: border-box;
 }
 
 .order-timeline::before {
     content: "";
     position: absolute;
     top: 15px;
-    left: 5%;
-    right: 5%;
+    left: 10%;
+    right: 10%;
     height: 2px;
-    background: #ddd;
+    background-color: #ddd;
+    z-index: 0;
 }
 
 .timeline-step {
@@ -200,25 +236,33 @@
 }
 
 .timeline-icon {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: #ddd;
+    background-color: #ddd;
     font-size: 15px;
+    box-sizing: border-box;
 }
 
 .timeline-step.active .timeline-icon {
-    background: #000;
+    background-color: #000;
     color: #fff;
 }
 
 .timeline-step span {
+    display: block;
+
     font-size: 11px;
     line-height: 1.4;
+
     color: #777;
+
+    text-align: center;
 }
 
 .timeline-step.active span {
@@ -226,7 +270,7 @@
     font-weight: 600;
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 1024px) {
 
     .bill-detail-grid {
         grid-template-columns: 1fr;
@@ -250,6 +294,7 @@
     }
 
     .detail-item-image {
+        flex-basis: 70px;
         width: 70px;
         height: 70px;
     }
@@ -259,17 +304,41 @@
     }
 
     .order-timeline {
-        margin-top: 25px;
+        width: 90%;
+        max-width: 600px;
+
+        margin: 30px auto 0;
+        padding: 0;
     }
 
+    .order-timeline::before {
+        left: 10%;
+        right: 10%;
+        top: 15px;
+    }
+
+    .timeline-step {
+        width: 20%;
+        min-width: 80px;
+    }
+
+    .timeline-icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .timeline-step span {
+        font-size: 11px;
+    }
 }
 
 @media screen and (max-width: 640px) {
 
     .main {
-        margin-left: 0 !important;
-
-        padding: 3%;
+        width: 100%;
+        margin-left: 0;
+        padding: 4%;
+        box-sizing: border-box;
     }
 
     .bill-detail-back {
@@ -286,16 +355,18 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+        margin-top: 0;
         margin-bottom: 18px;
     }
 
     .bill-detail-header h2 {
-        font-size: 19px;
         margin-bottom: 5px;
+        font-size: 19px;
     }
 
     .bill-detail-id {
         font-size: 12px;
+        overflow-wrap: anywhere;
     }
 
     .bill-detail-status {
@@ -306,9 +377,11 @@
     .bill-detail-grid {
         grid-template-columns: 1fr;
         gap: 0;
+        width: 100%;
     }
 
     .bill-detail-card {
+        width: 100%;
         padding: 15px;
         margin-bottom: 15px;
         border-radius: 10px;
@@ -326,9 +399,14 @@
     }
 
     .detail-item-image {
+        flex: 0 0 55px;
         width: 55px;
         height: 55px;
         border-radius: 8px;
+    }
+
+    .detail-item-info {
+        min-width: 0;
     }
 
     .detail-item-info h4 {
@@ -376,44 +454,76 @@
     }
 
     .order-timeline {
-        justify-content: flex-start;
-        gap: 25px;
-        margin-top: 25px;
-        padding: 0 5px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .order-timeline::-webkit-scrollbar {
-        display: none;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 340px;
+        margin: 20px auto 5px;
+        padding: 0;
+        box-sizing: border-box;
+        overflow: visible;
     }
 
     .order-timeline::before {
+        content: "";
+        position: absolute;
         top: 15px;
-        left: 5%;
-        right: auto;
-
-        width: calc(
-            (100px * 5) + (25px * 4) - 20px
-        );
+        bottom: 15px;
+        left: 20px;
+        width: 2px;
+        height: auto;
+        background-color: #ddd;
+        z-index: 0;
     }
 
     .timeline-step {
-        flex: 0 0 100px;
-        width: 100px;
-        min-width: 100px;
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 40px minmax(0, 1fr);
+        align-items: center;
+        width: 100%;
+        min-width: 0;
+        min-height: 58px;
+        gap: 20px;
+        text-align: left;
+        box-sizing: border-box;
     }
 
     .timeline-icon {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 30px;
         height: 30px;
+        margin: 0 auto;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background-color: #ddd;
         font-size: 14px;
+        box-sizing: border-box;
+    }
+
+
+    .timeline-step.active .timeline-icon {
+        background-color: #000;
+        color: #fff;
     }
 
     .timeline-step span {
-        font-size: 10px;
+        display: block;
+        font-size: 12px;
+        line-height: 1.4;
+        text-align: left;
+        color: #777;
+    }
+
+    .timeline-step.active span {
+        color: #000;
+        font-weight: 600;
     }
 
     body.sidebar-open .menu-toggle {
@@ -424,5 +534,4 @@
         background-color: var(--whiteColor);
         color: var(--primaryColor);
     }
-
 }
