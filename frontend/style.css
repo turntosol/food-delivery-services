@@ -16,11 +16,6 @@
     font-family: 'Open Sans', sans-serif;
 }
 
-
-/* =========================
-   MAIN
-========================= */
-
 .main {
     max-width: auto;
     height: max-content;
@@ -29,11 +24,6 @@
     background-color: var(--softGreenColor);
     margin-left: 250px;
 }
-
-
-/* =========================
-   NAVBAR
-========================= */
 
 .main-navbar {
     display: flex;
@@ -44,9 +34,6 @@
 .menu-toggle {
     display: none;
 }
-
-
-/* Search */
 
 .search {
     width: 60%;
@@ -81,9 +68,6 @@
 .search-btn:hover {
     background-color: var(--primaryColor);
 }
-
-
-/* Profile */
 
 .profile {
     display: flex;
@@ -144,10 +128,6 @@
 }
 
 
-/* =========================
-   RECOMMENDATIONS
-========================= */
-
 .main-highlight {
     margin: 3% 0;
     padding: 2%;
@@ -180,61 +160,97 @@
     color: var(--primaryColor);
 }
 
-
-/* Recommendation wrapper */
-
 .highlight-wrapper {
     width: 100%;
     display: flex;
+    align-items: stretch;
+
     padding: 1%;
     border-radius: 8px;
+
     gap: 1.5rem;
-    overflow-x: hidden;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-behavior: smooth;
+    scrollbar-width: none;
 }
 
-
-/* Recommendation card */
+.highlight-wrapper::-webkit-scrollbar {
+    display: none;
+}
 
 .highlight-card {
+    flex: 0 0 300px;
+
     display: flex;
     flex-direction: row;
-    min-width: 200px;
-    width: 80%;
-    height: 100%;
+    align-items: center;
+
+    min-width: 300px;
+    height: 80px;
+
     gap: 1rem;
+
     border-radius: 8px;
-    padding: 5px; 
+    padding: 8px;
+
     background-color: var(--greyColor);
+
     cursor: pointer;
+
+    transition: background-color 0.2s ease,
+                box-shadow 0.2s ease,
+                transform 0.2s ease;
 }
 
 .highlight-card:hover {
     background-color: var(--whiteColor);
-    box-shadow: rgba(176, 176, 176, 0.2) 0px 2px 8px 0px;
+
+    box-shadow:
+        rgba(176, 176, 176, 0.2)
+        0px 2px 8px 0px;
+
+    transform: translateY(-2px);
 }
 
 .highlight-img {
-    width: 50px; 
-    height: 60px; 
+    flex-shrink: 0;
+
+    width: 55px;
+    height: 60px;
+
     border-radius: 8px;
+
     object-fit: cover;
     object-position: center;
 }
 
+.highlight-desc {
+    min-width: 0;
+    overflow: hidden;
+}
+
 .highlight-desc h5 {
     color: var(--primaryColor);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .highlight-desc p {
-    margin-top: 7px; 
+    margin-top: 7px;
+
     color: var(--blackColor);
+
     font-size: 13px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-
-
-/* =========================
-   MENU
-========================= */
 
 .main-menus {
     min-height: 100%;
@@ -242,9 +258,6 @@
     padding: 2%;
     border-radius: 8px;
 }
-
-
-/* Category */
 
 .main-filter {
     position: relative;
@@ -265,26 +278,21 @@
     color: var(--primaryColor);
 }
 
-
-/* Category wrapper */
-
 .filter-wrapper {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    overflow-x: auto; /* Cho phép cuộn ngang */
+    overflow-x: auto; 
     scroll-behavior: smooth;
     width: 100%;
     height: 100px;
     gap: 1.2rem;
-    scrollbar-width: none; /* Ẩn scrollbar trên Firefox */
+    scrollbar-width: none; 
 }
 
 .filter-wrapper::-webkit-scrollbar {
-    display: none; /* Ẩn scrollbar trên Chrome, Safari */
+    display: none; 
 }
-
-/* Category card */
 
 .filter-card {
     display: flex;
@@ -331,9 +339,6 @@
     background-color: var(--whiteColor);
 }
 
-
-/* Divider */
-
 .divider {
     margin: 1rem 0;
     height: 2px;
@@ -342,21 +347,9 @@
     border: none;
 }
 
-
-/* =========================
-   CHOOSE ORDER
-========================= */
-
-/* =========================
-   CHOOSE ORDER
-========================= */
-
 .main-detail {
     margin: 1rem 0 1.5rem 0;
 }
-
-
-/* Food wrapper */
 
 .detail-wrapper {
     display: grid;
@@ -366,11 +359,6 @@
     gap: 20px;
 }
 
-
-/* =========================
-   FOOD CARD
-========================= */
-
 .detail-card {
     position: relative;
     overflow: hidden;
@@ -378,7 +366,6 @@
     height: 250px;
     border-radius: 15px;
     cursor: pointer;
-
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -386,11 +373,6 @@
     transform: translateY(-4px);
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
-
-
-/* =========================
-   FOOD IMAGE
-========================= */
 
 .detail-card .highlight-img {
     width: 100%;
@@ -401,19 +383,12 @@
     object-position: center;
 }
 
-
-/* =========================
-   FOOD INFORMATION
-========================= */
-
 .detail-card .highlight-desc {
     position: absolute;
     left: 0;
     bottom: 0;
-
     width: 100%;
     padding: 2rem 1rem 1rem;
-
     color: var(--whiteColor);
     text-align: center;
 
@@ -426,9 +401,6 @@
     );
 }
 
-
-/* Food name */
-
 .detail-card .highlight-desc h4 {
     margin: 0 0 5px;
 
@@ -437,25 +409,16 @@
     font-weight: 600;
 }
 
-
-/* Food description */
-
 .detail-card .highlight-desc .food-description {
     margin: 0 0 5px;
-
     color: var(--whiteColor);
     font-size: 12px;
     line-height: 1.4;
-
-    /* Chỉ hiển thị tối đa 2 dòng */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-
-
-/* Food price */
 
 .detail-card .highlight-desc .food-price {
     margin: 0;
@@ -465,11 +428,6 @@
     font-weight: 600;
 }
 
-
-/* =========================
-   FOOD CARD HOVER
-========================= */
-
 .detail-card:hover .highlight-desc h4 {
     color: var(--secondaryColor);
 }
@@ -478,33 +436,57 @@
     letter-spacing: 1px;
 }
 
-
-/* =========================
-   TABLET
-========================= */
-
 @media screen and (max-width: 900px) {
 
     .detail-wrapper {
         grid-template-columns: repeat(2, 1fr);
     }
 
+    .main-highlight {
+        margin: 3% 0;
+        padding: 2%;
+    }
+
+    .highlight-wrapper {
+        gap: 1rem;
+        padding: 1%;
+    }
+
+    .highlight-card {
+        flex: 0 0 260px;
+        min-width: 260px;
+        height: 75px;
+
+        gap: 0.8rem;
+        padding: 7px;
+    }
+
+    .highlight-img {
+        width: 50px;
+        height: 55px;
+    }
+
+    .highlight-desc h5 {
+        font-size: 14px;
+    }
+
+    .highlight-desc p {
+        font-size: 12px;
+    }
+
 }
-
-
-/* =========================
-   MOBILE
-========================= */
 
 @media screen and (max-width: 640px) {
 
     .main {
         margin-left: 0 !important;
+        padding: 3%;
     }
 
     .menu-toggle {
         display: flex;
-        font-size: 20px; 
+        flex-shrink: 0;
+        font-size: 20px;
         color: var(--primaryColor);
         justify-content: center;
         align-items: center;
@@ -512,7 +494,11 @@
         border-radius: 50%;
         cursor: pointer;
         z-index: 100;
-        box-shadow: rgba(149, 157, 165, 0.2) 0px 4px 12px;
+
+        box-shadow:
+            rgba(149, 157, 165, 0.2)
+            0px 4px 12px;
+
         transition: all 0.3s ease-in-out;
     }
 
@@ -523,22 +509,105 @@
 
     body.sidebar-open .menu-toggle {
         position: fixed;
-        left: 195px; 
+        left: 195px;
         top: 15px;
         z-index: 1001;
         background-color: var(--whiteColor);
         color: var(--primaryColor);
     }
 
-
-    /* Search */
-
-    .search {
-        width: 60%;
+    .main-navbar {
+        gap: 10px;
     }
 
+    .search {
+        flex: 1;
+        width: auto;
+        height: 38px;
+    }
 
-    /* Food */
+    .search input {
+        width: 100%;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    .search-btn {
+        width: 70px;
+        flex-shrink: 0;
+        font-size: 12px;
+    }
+
+    .profile {
+        gap: 6px;
+    }
+
+    .cart,
+    .user {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        font-size: 18px;
+    }
+
+    .main-highlight {
+        margin: 5% 0;
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    .main-highlight .main-title {
+        font-size: 18px;
+    }
+
+    .main-highlight .main-arrow {
+        font-size: 22px;
+    }
+
+    .highlight-wrapper {
+        gap: 10px;
+        padding: 10px 2px 5px;
+        margin-top: 5px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .highlight-card {
+        flex: 0 0 85%;
+        min-width: 85%;
+        height: 72px;
+        gap: 10px;
+        padding: 7px;
+        scroll-snap-align: start;
+    }
+
+    .highlight-img {
+        width: 48px;
+        height: 56px;
+        flex-shrink: 0;
+    }
+
+    .highlight-desc {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .highlight-desc h5 {
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .highlight-desc p {
+        margin-top: 4px;
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
     .detail-wrapper {
         grid-template-columns: 1fr;
@@ -561,6 +630,10 @@
     .sidebar.active {
         display: flex !important;
         z-index: 1000;
-        box-shadow: rgba(0, 0, 0, 0.3) 0px 0px 20px;
+
+        box-shadow:
+            rgba(0, 0, 0, 0.3)
+            0px 0px 20px;
     }
 }
+
