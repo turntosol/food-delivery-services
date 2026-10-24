@@ -2,6 +2,10 @@ import os
 
 from django.contrib.auth import get_user_model
 
+import time
+
+from django.conf import settings
+
 from rest_framework import (
     status,
     viewsets,
@@ -26,6 +30,8 @@ from rest_framework_simplejwt.tokens import (
     RefreshToken
 )
 
+from supabase import create_client
+
 from .models import (
     UserSettings,
     Address,
@@ -39,6 +45,8 @@ from .serializers import (
     UserSettingsSerializer,
     ChangePasswordSerializer,
 )
+
+supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 User = get_user_model()
 
@@ -230,14 +238,13 @@ class AccountViewSet(viewsets.ViewSet):
 
         if not avatar_file:
             return Response(
-                {"avatar": ["Please upload image!"]},
+                {"avatar": ["Vui lòng chọn file ảnh."]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        max_size = 5 * 1024 * 1024
-        if avatar_file.size > max_size:
+        if avatar_file.size > 5 * 1024 * 1024:
             return Response(
-                {"avatar": ["Dung lượng ảnh vượt quá 5MB. Vui lòng chọn ảnh khác."]},
+                {"avatar": ["Dung lượng ảnh vượt quá 5MB."]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -245,29 +252,45 @@ class AccountViewSet(viewsets.ViewSet):
         ext = os.path.splitext(avatar_file.name)[1].lower()
         if ext not in valid_extensions:
             return Response(
-                {"avatar": ["Chỉ chấp nhận file ảnh có định dạng JPG, JPEG, PNG hoặc WEBP."]},
+                {"avatar": ["Chỉ chấp nhận JPG, JPEG, PNG hoặc WEBP."]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if user.avatar:
-            user.avatar.delete(save=False)
+        try:
+            # Đặt tên file theo user ID và timestamp để tránh trùng/ghi đè nhầm
+            file_name = f"user_{user.id}_{int(time.time())}{ext}"
+            file_bytes = avatar_file.read()
+            content_type = avatar_file.content_type or "image/jpeg"
 
-        user.avatar = avatar_file
-        user.save(update_fields=["avatar", "updated_at"])
+            # Upload buffer trực tiếp lên Supabase
+            supabase.storage.from_(settings.SUPABASE_AVATAR_BUCKET).upload(
+                path=file_name,
+                file=file_bytes,
+                file_options={"content-type": content_type, "upsert": "true"},
+            )
 
-        avatar_url = (
-            request.build_absolute_uri(user.avatar.url)
-            if user.avatar
-            else None
-        )
+            # Lấy public URL
+            avatar_url = supabase.storage.from_(
+                settings.SUPABASE_AVATAR_BUCKET
+            ).get_public_url(file_name)
 
-        return Response(
-            {
-                "message": "Avatar updated successfully.",
-                "avatar_url": avatar_url,
-            },
-            status=status.HTTP_200_OK,
-        )
+            # Lưu link cloud vào database
+            user.avatar = avatar_url
+            user.save(update_fields=["avatar", "updated_at"])
+
+            return Response(
+                {
+                    "message": "Avatar updated successfully.",
+                    "avatar_url": avatar_url,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            return Response(
+                {"detail": f"Supabase error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     @action(detail=False, methods=["get", "patch"], url_path="settings")
     def user_settings(self, request):

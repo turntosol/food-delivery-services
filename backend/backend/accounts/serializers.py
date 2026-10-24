@@ -95,8 +95,8 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
 
-class ProfileSerializer(serializers.ModelSerializer):
 
+class ProfileSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -111,25 +111,23 @@ class ProfileSerializer(serializers.ModelSerializer):
             "avatar",
             "avatar_url",
         ]
-
-        read_only_fields = [
-            "id",
-            "username",
-            "email",
-            "avatar_url",
-        ]
+        read_only_fields = ["id", "username", "email", "avatar_url"]
 
     def get_avatar_url(self, obj):
-        if obj.avatar:
-            request = self.context.get("request")
+        if not obj.avatar:
+            return None
 
-            if request:
-                return request.build_absolute_uri(
-                    obj.avatar.url
-                )
-            return obj.avatar.url
+        url_str = str(obj.avatar)
 
-        return None
+        if url_str.startswith("http://") or url_str.startswith("https://"):
+            return url_str
+
+        request = self.context.get("request")
+        if request and hasattr(obj.avatar, "url"):
+            return request.build_absolute_uri(obj.avatar.url)
+
+        return getattr(obj.avatar, "url", url_str)
+
 
 
 class AddressSerializer(

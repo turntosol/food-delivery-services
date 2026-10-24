@@ -17,17 +17,8 @@ import {
 } from "../api/authApi.js";
 
 
-// ==================================================
-// STATE
-// ==================================================
-
 let currentAddresses = [];
 let editingAddressId = null;
-
-
-// ==================================================
-// INITIALIZE
-// ==================================================
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -51,15 +42,10 @@ document.addEventListener(
     }
 );
 
-
-// ==================================================
-// PROFILE
-// ==================================================
-
 async function loadProfile() {
     try {
         const profile = await getProfile();
-        console.log("Profile data from API:", profile); 
+        console.log("Profile data from API:", profile);
 
         const avatarPreview = document.querySelector("#avatar-preview");
 
@@ -104,39 +90,44 @@ async function loadProfile() {
 async function handleAvatarChange(file) {
     if (!file) return;
 
-    // 1. Kiểm tra định dạng ảnh cho phép
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
         showMessage("Vui lòng chọn định dạng file JPG, PNG hoặc WEBP.", "error");
         return;
     }
 
-    // 2. Kiểm tra dung lượng (Max 5MB = 5 * 1024 * 1024 bytes)
     const maxSizeBytes = 5 * 1024 * 1024;
     if (file.size > maxSizeBytes) {
         showMessage("Dung lượng ảnh vượt quá 5MB. Vui lòng chọn ảnh khác.", "error");
         return;
     }
 
-    const avatarPreview = document.querySelector("#avatar-preview");
-    const oldAvatarSrc = avatarPreview ? avatarPreview.src : null;
+    const response = await changeAvatar(file);
+    const newAvatarUrl = response.avatar_url;
 
-    // 3. Preview tạm thời trên giao diện
-    if (avatarPreview) {
-        avatarPreview.src = URL.createObjectURL(file);
+    const avatarPreview = document.querySelector("#avatar-preview");
+    if (avatarPreview && newAvatarUrl) {
+        avatarPreview.src = `${newAvatarUrl}?t=${Date.now()}`;
     }
 
+    const currentUser = JSON.parse(localStorage.getItem("current_user") || "{}");
+    localStorage.setItem(
+        "current_user",
+        JSON.stringify({
+            ...currentUser,
+            avatar: newAvatarUrl,
+            avatar_url: newAvatarUrl
+        })
+    );
+
     try {
-        // 4. Gọi API upload
         const updatedProfile = await changeAvatar(file);
 
-        // 5. Cập nhật ảnh chính thức từ URL backend trả về
         const newAvatarUrl = updatedProfile.avatar;
         if (avatarPreview && newAvatarUrl) {
             avatarPreview.src = newAvatarUrl;
         }
 
-        // 6. Đồng bộ vào localStorage
         const currentUser = JSON.parse(
             localStorage.getItem("current_user") || "{}"
         );
@@ -153,7 +144,6 @@ async function handleAvatarChange(file) {
     } catch (error) {
         console.error("Lỗi cập nhật avatar:", error);
 
-        // Phục hồi lại ảnh cũ nếu xảy ra lỗi
         if (avatarPreview && oldAvatarSrc) {
             avatarPreview.src = oldAvatarSrc;
         }
@@ -165,31 +155,20 @@ async function handleAvatarChange(file) {
     }
 }
 
-// ==================================================
-// PROFILE UPDATE
-// ==================================================
-
 function setupProfile() {
     const profileForm = document.getElementById("profile-form");
     const avatarInput = document.getElementById("avatar");
 
-    // ==========================================
-    // LẮNG NGHE SỰ KIỆN ĐỔI AVATAR TỰ ĐỘNG
-    // ==========================================
     avatarInput?.addEventListener("change", async (event) => {
         const file = event.target.files[0];
         if (file) {
             await handleAvatarChange(file);
-            // Reset input để có thể chọn lại cùng 1 file nếu vừa tải thất bại
             avatarInput.value = "";
         }
     });
 
     if (!profileForm) return;
 
-    // ==========================================
-    // LƯU THÔNG TIN CÁ NHÂN (TEXT FIELDS)
-    // ==========================================
     profileForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
@@ -233,9 +212,6 @@ function setupProfile() {
         }
     });
 }
-// ==================================================
-// ADDRESS
-// ==================================================
 
 async function loadAddresses() {
 
@@ -299,19 +275,18 @@ function renderAddresses() {
 
                         <h4>
                             ${escapeHTML(
-                                address.receiver_name
-                            )}
+                address.receiver_name
+            )}
                         </h4>
 
-                        ${
-                            address.is_default
-                                ? `
+                        ${address.is_default
+                    ? `
                                     <span class="default-badge">
                                         Default
                                     </span>
                                   `
-                                : ""
-                        }
+                    : ""
+                }
 
                     </div>
 
@@ -322,8 +297,8 @@ function renderAddresses() {
                         </ion-icon>
 
                         ${escapeHTML(
-                            address.phone
-                        )}
+                    address.phone
+                )}
                     </p>
 
 
@@ -333,8 +308,8 @@ function renderAddresses() {
                         </ion-icon>
 
                         ${escapeHTML(
-                            address.address
-                        )}
+                    address.address
+                )}
                     </p>
 
                 </div>
@@ -356,17 +331,16 @@ function renderAddresses() {
                     </button>
 
 
-                    ${
-                        !address.is_default
-                            ? `
+                    ${!address.is_default
+                    ? `
                                 <button
                                     class="default-address"
                                     data-id="${address.id}">
                                     Set as Default
                                 </button>
                               `
-                            : ""
-                    }
+                    : ""
+                }
 
                 </div>
 
@@ -381,10 +355,6 @@ function renderAddresses() {
     setupAddressButtons();
 }
 
-
-// ==================================================
-// ADDRESS BUTTONS
-// ==================================================
 
 function setupAddressButtons() {
 
@@ -454,10 +424,6 @@ function setupAddressButtons() {
 }
 
 
-// ==================================================
-// ADDRESS SETUP
-// ==================================================
-
 function setupAddress() {
 
     const addButton =
@@ -502,10 +468,6 @@ function setupAddress() {
     }
 }
 
-
-// ==================================================
-// ADD ADDRESS
-// ==================================================
 
 function openAddAddress() {
 
@@ -555,10 +517,6 @@ function openAddAddress() {
     modal.classList.add("active");
 }
 
-
-// ==================================================
-// EDIT ADDRESS
-// ==================================================
 
 function openEditAddress(id) {
 
@@ -629,10 +587,6 @@ function openEditAddress(id) {
     modal.classList.add("active");
 }
 
-
-// ==================================================
-// ADDRESS SUBMIT
-// ==================================================
 
 async function handleAddressSubmit(event) {
 
@@ -723,10 +677,6 @@ async function handleAddressSubmit(event) {
 }
 
 
-// ==================================================
-// DELETE ADDRESS
-// ==================================================
-
 async function handleDeleteAddress(id) {
 
     const confirmed =
@@ -764,10 +714,6 @@ async function handleDeleteAddress(id) {
 }
 
 
-// ==================================================
-// SET DEFAULT ADDRESS
-// ==================================================
-
 async function handleSetDefaultAddress(id) {
 
     try {
@@ -796,10 +742,6 @@ async function handleSetDefaultAddress(id) {
 }
 
 
-// ==================================================
-// CLOSE ADDRESS MODAL
-// ==================================================
-
 function closeAddressModal() {
 
     const modal =
@@ -815,68 +757,11 @@ function closeAddressModal() {
 }
 
 
-// ==================================================
-// SETTINGS
-// ==================================================
+async function loadSettings() {
 
-    async function loadSettings() {
+    try {
 
-        try {
-
-            const settings = await getSettings();
-
-            const emailCheckbox =
-                document.querySelector(
-                    "#email-notifications"
-                );
-
-            const orderCheckbox =
-                document.querySelector(
-                    "#order-notifications"
-                );
-
-            const promotionalCheckbox =
-                document.querySelector(
-                    "#promotional-notifications"
-                );
-
-
-            if (emailCheckbox) {
-                emailCheckbox.checked =
-                    settings.email_notifications;
-            }
-
-
-            if (orderCheckbox) {
-                orderCheckbox.checked =
-                    settings.order_notifications;
-            }
-
-
-            if (promotionalCheckbox) {
-                promotionalCheckbox.checked =
-                    settings.promotional_notifications;
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Failed to load notification settings:",
-                error
-            );
-
-            showMessage(
-                "Failed to load notification settings.",
-                "error"
-            );
-        }
-    }
-
-// ==================================================
-// NOTIFICATIONS
-// ==================================================
-
-    function setupNotifications() {
+        const settings = await getSettings();
 
         const emailCheckbox =
             document.querySelector(
@@ -894,304 +779,296 @@ function closeAddressModal() {
             );
 
 
-        emailCheckbox?.addEventListener(
-            "change",
-            async () => {
+        if (emailCheckbox) {
+            emailCheckbox.checked =
+                settings.email_notifications;
+        }
 
-                try {
 
-                    await updateSettings({
-                        email_notifications:
-                            emailCheckbox.checked
-                    });
+        if (orderCheckbox) {
+            orderCheckbox.checked =
+                settings.order_notifications;
+        }
 
-                } catch (error) {
 
-                    console.error(error);
+        if (promotionalCheckbox) {
+            promotionalCheckbox.checked =
+                settings.promotional_notifications;
+        }
 
-                    // Rollback UI nếu API thất bại
-                    emailCheckbox.checked =
-                        !emailCheckbox.checked;
+    } catch (error) {
 
-                    showMessage(
-                        "Failed to update email notification setting.",
-                        "error"
-                    );
-                }
-
-            }
+        console.error(
+            "Failed to load notification settings:",
+            error
         );
 
-
-        orderCheckbox?.addEventListener(
-            "change",
-            async () => {
-
-                try {
-
-                    await updateSettings({
-                        order_notifications:
-                            orderCheckbox.checked
-                    });
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    orderCheckbox.checked =
-                        !orderCheckbox.checked;
-
-                    showMessage(
-                        "Failed to update order notification setting.",
-                        "error"
-                    );
-                }
-
-            }
-        );
-
-
-        promotionalCheckbox?.addEventListener(
-            "change",
-            async () => {
-
-                try {
-
-                    await updateSettings({
-                        promotional_notifications:
-                            promotionalCheckbox.checked
-                    });
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    promotionalCheckbox.checked =
-                        !promotionalCheckbox.checked;
-
-                    showMessage(
-                        "Failed to update promotional notification setting.",
-                        "error"
-                    );
-                }
-
-            }
+        showMessage(
+            "Failed to load notification settings.",
+            "error"
         );
     }
+}
 
 
-    async function updateNotificationSetting(
-        field,
-        value
-    ) {
+function setupNotifications() {
+
+    const emailCheckbox =
+        document.querySelector(
+            "#email-notifications"
+        );
+
+    const orderCheckbox =
+        document.querySelector(
+            "#order-notifications"
+        );
+
+    const promotionalCheckbox =
+        document.querySelector(
+            "#promotional-notifications"
+        );
+
+
+    emailCheckbox?.addEventListener(
+        "change",
+        async () => {
+
+            try {
+
+                await updateSettings({
+                    email_notifications:
+                        emailCheckbox.checked
+                });
+
+            } catch (error) {
+
+                console.error(error);
+
+                emailCheckbox.checked =
+                    !emailCheckbox.checked;
+
+                showMessage(
+                    "Failed to update email notification setting.",
+                    "error"
+                );
+            }
+
+        }
+    );
+
+
+    orderCheckbox?.addEventListener(
+        "change",
+        async () => {
+
+            try {
+
+                await updateSettings({
+                    order_notifications:
+                        orderCheckbox.checked
+                });
+
+            } catch (error) {
+
+                console.error(error);
+
+                orderCheckbox.checked =
+                    !orderCheckbox.checked;
+
+                showMessage(
+                    "Failed to update order notification setting.",
+                    "error"
+                );
+            }
+
+        }
+    );
+
+
+    promotionalCheckbox?.addEventListener(
+        "change",
+        async () => {
+
+            try {
+
+                await updateSettings({
+                    promotional_notifications:
+                        promotionalCheckbox.checked
+                });
+
+            } catch (error) {
+
+                console.error(error);
+
+                promotionalCheckbox.checked =
+                    !promotionalCheckbox.checked;
+
+                showMessage(
+                    "Failed to update promotional notification setting.",
+                    "error"
+                );
+            }
+
+        }
+    );
+}
+
+
+async function updateNotificationSetting(
+    field,
+    value
+) {
+
+    try {
+
+        await updateSettings({
+            [field]: value
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Error updating notification setting:",
+            error
+        );
+
+        await loadSettings();
+
+        showMessage(
+            "Failed to update notification setting.",
+            "error"
+        );
+    }
+}
+
+function setupPassword() {
+    const passwordForm = document.getElementById("password-form");
+
+    if (!passwordForm) return;
+
+    passwordForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const currentPassword =
+            document
+                .getElementById("current-password")
+                .value
+                .trim();
+
+        const newPassword =
+            document
+                .getElementById("new-password")
+                .value
+                .trim();
+
+        const confirmPassword =
+            document
+                .getElementById("confirm-password")
+                .value
+                .trim();
+
+        if (!currentPassword) {
+            showMessage(
+                "Please enter your current password.",
+                "error"
+            );
+            return;
+        }
+
+        if (!newPassword) {
+            showMessage(
+                "Please enter your new password.",
+                "error"
+            );
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            showMessage(
+                "New passwords do not match.",
+                "error"
+            );
+            return;
+        }
+
+        if (newPassword === currentPassword) {
+            showMessage(
+                "New password must be different from current password.",
+                "error"
+            );
+            return;
+        }
 
         try {
-
-            await updateSettings({
-                [field]: value
+            await changePassword({
+                old_password: currentPassword,
+                new_password: newPassword
             });
 
-        } catch (error) {
+            logoutUser();
 
+            window.location.href = "../auth/login.html?password_changed=true";
+
+        } catch (error) {
             console.error(
-                "Error updating notification setting:",
+                "Change password error:",
                 error
             );
 
-            await loadSettings();
-
             showMessage(
-                "Failed to update notification setting.",
+                error.message ||
+                "Failed to change password.",
                 "error"
             );
         }
-    }
+    });
+}
 
-// ==================================================
-// DARK MODE
-// ==================================================
+function setupLogout() {
 
+    const logoutButton = document.querySelector("#logout-btn");
 
-// ==================================================
-// PASSWORD
-// ==================================================
+    logoutButton?.addEventListener(
+        "click",
 
-    function setupPassword() {
-        const passwordForm =
-            document.getElementById("password-form");
-
-        if (!passwordForm) return;
-
-        passwordForm.addEventListener("submit", async (event) => {
-            event.preventDefault();
-
-            const currentPassword =
-                document
-                    .getElementById("current-password")
-                    .value
-                    .trim();
-
-            const newPassword =
-                document
-                    .getElementById("new-password")
-                    .value
-                    .trim();
-
-            const confirmPassword =
-                document
-                    .getElementById("confirm-password")
-                    .value
-                    .trim();
-
-            // Validate current password
-            if (!currentPassword) {
-                showMessage(
-                    "Please enter your current password.",
-                    "error"
-                );
-                return;
-            }
-
-            // Validate new password
-            if (!newPassword) {
-                showMessage(
-                    "Please enter your new password.",
-                    "error"
-                );
-                return;
-            }
-
-            // Confirm password
-            if (newPassword !== confirmPassword) {
-                showMessage(
-                    "New passwords do not match.",
-                    "error"
-                );
-                return;
-            }
-
-            // Prevent using the same password
-            if (newPassword === currentPassword) {
-                showMessage(
-                    "New password must be different from current password.",
-                    "error"
-                );
-                return;
-            }
-
-            try {
-                await changePassword({
-                    old_password: currentPassword,
-                    new_password: newPassword
-                });
-
-                logoutUser();
-
-                window.location.href =
-                    "../auth/login.html?password_changed=true";
-
-            } catch (error) {
-                console.error(
-                    "Change password error:",
-                    error
-                );
-
-                showMessage(
-                    error.message ||
-                    "Failed to change password.",
-                    "error"
-                );
-            }
-        });
-    }
-
-// ==================================================
-// LOGOUT
-// ==================================================
-
-    function setupLogout() {
-
-        const logoutButton =
-            document.querySelector(
-                "#logout-btn"
-            );
-
-
-        logoutButton?.addEventListener(
-            "click",
-            () => {
-
-                logoutUser();
-
-                window.location.href =
-                    "../auth/login.html";
-
-            }
-        );
-    }
-
-
-// ==================================================
-// MESSAGE
-// ==================================================
-
-    function showMessage(
-        message,
-        type = "success"
-    ) {
-
-        let messageBox =
-            document.querySelector(
-                "#setting-message"
-            );
-
-
-        if (!messageBox) {
-
-            messageBox =
-                document.createElement(
-                    "div"
-                );
-
-            messageBox.id =
-                "setting-message";
-
-            document.body.appendChild(
-                messageBox
-            );
+        () => {
+            logoutUser();
+            window.location.href = "../auth/login.html";
         }
+    );
+}
 
+function showMessage(
+    message,
+    type = "success"
+) {
 
-        messageBox.textContent =
-            message;
+    let messageBox = document.querySelector("#setting-message");
 
-        messageBox.className =
-            `setting-message ${type}`;
-
-
-        setTimeout(
-            () => {
-
-                messageBox.remove();
-
-            },
-            3000
-        );
+    if (!messageBox) {
+        messageBox = document.createElement("div");
+        messageBox.id = "setting-message";
+        document.body.appendChild(messageBox);
     }
 
 
-// ==================================================
-// ESCAPE HTML
-// ==================================================
+    messageBox.textContent = message;
+    messageBox.className = `setting-message ${type}`;
+
+    setTimeout(
+        () => {
+            messageBox.remove();
+        },
+        3000
+    );
+}
 
 function escapeHTML(value) {
 
     if (value === null ||
         value === undefined) {
-
         return "";
     }
-
 
     return String(value)
         .replaceAll("&", "&amp;")
