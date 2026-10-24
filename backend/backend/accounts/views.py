@@ -32,6 +32,8 @@ from rest_framework_simplejwt.tokens import (
 
 from supabase import create_client
 
+from django.utils import timezone
+
 from .models import (
     UserSettings,
     Address,
@@ -238,13 +240,13 @@ class AccountViewSet(viewsets.ViewSet):
 
         if not avatar_file:
             return Response(
-                {"avatar": ["Vui lòng chọn file ảnh."]},
+                {"avatar": ["Please choose image file!"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if avatar_file.size > 5 * 1024 * 1024:
             return Response(
-                {"avatar": ["Dung lượng ảnh vượt quá 5MB."]},
+                {"avatar": [""]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -276,6 +278,7 @@ class AccountViewSet(viewsets.ViewSet):
 
             # Lưu link cloud vào database
             user.avatar = avatar_url
+            user.updated_at = timezone.now()
             user.save(update_fields=["avatar", "updated_at"])
 
             return Response(
