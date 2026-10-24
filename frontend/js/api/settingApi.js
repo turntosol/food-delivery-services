@@ -23,7 +23,7 @@ export async function changeAvatar(file) {
     formData.append("avatar", file);
 
     return await apiRequest(
-        "/account/profile/",
+        "/account/change-avatar/",
         {
             method: "PATCH",
             body: formData
