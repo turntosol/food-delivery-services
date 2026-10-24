@@ -246,7 +246,7 @@ class AccountViewSet(viewsets.ViewSet):
 
         if avatar_file.size > 5 * 1024 * 1024:
             return Response(
-                {"avatar": [""]},
+                {"avatar": ["> 500MB"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -254,32 +254,29 @@ class AccountViewSet(viewsets.ViewSet):
         ext = os.path.splitext(avatar_file.name)[1].lower()
         if ext not in valid_extensions:
             return Response(
-                {"avatar": ["Chỉ chấp nhận JPG, JPEG, PNG hoặc WEBP."]},
+                {"avatar": ["Only JPG, JPEG, PNG or WEBP."]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            # Đặt tên file theo user ID và timestamp để tránh trùng/ghi đè nhầm
             file_name = f"user_{user.id}_{int(time.time())}{ext}"
             file_bytes = avatar_file.read()
             content_type = avatar_file.content_type or "image/jpeg"
 
-            # Upload buffer trực tiếp lên Supabase
             supabase.storage.from_(settings.SUPABASE_AVATAR_BUCKET).upload(
                 path=file_name,
                 file=file_bytes,
                 file_options={"content-type": content_type, "upsert": "true"},
             )
 
-            # Lấy public URL
-            avatar_url = supabase.storage.from_(
+            avatar = supabase.storage.from_(
                 settings.SUPABASE_AVATAR_BUCKET
             ).get_public_url(file_name)
 
             current_time = timezone.now()
         
             User.objects.filter(id=user.id).update(
-                avatar=avatar_url,
+                avatar=avatar,
                 updated_at=current_time
             )
 
@@ -288,7 +285,7 @@ class AccountViewSet(viewsets.ViewSet):
             return Response(
                 {
                     "message": "Avatar updated successfully.",
-                    "avatar_url": user.avatar if isinstance(user.avatar, str) else user.avatar.url,
+                    "avatar": user.avatar,
                     "updated_at": user.updated_at
                 },
                 status=status.HTTP_200_OK,

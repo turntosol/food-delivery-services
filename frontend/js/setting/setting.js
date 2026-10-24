@@ -49,7 +49,11 @@ async function loadProfile() {
 
         const avatarPreview = document.querySelector("#avatar-preview");
 
-        const avatarUrl = profile.avatar_url || profile.avatar;
+        const avatarUrl = profile.avatar;
+        
+        if (avatarUrl) {
+            updateAllAvatarsOnPage(avatarUrl);
+        }
 
         if (avatarPreview && avatarUrl) {
             avatarPreview.src = `${avatarUrl}?t=${new Date().getTime()}`;
@@ -78,7 +82,6 @@ async function loadProfile() {
                 ...currentUser,
                 ...profile,
                 avatar: avatarUrl,
-                avatar_url: avatarUrl
             })
         );
     } catch (error) {
@@ -92,7 +95,7 @@ async function handleAvatarChange(file) {
 
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-        showMessage("Vui lòng chọn định dạng file JPG, PNG hoặc WEBP.", "error");
+        showMessage("Choose file", "error");
         return;
     }
 
@@ -103,7 +106,7 @@ async function handleAvatarChange(file) {
     }
 
     const response = await changeAvatar(file);
-    const newAvatarUrl = response.avatar_url;
+    const newAvatarUrl = response.avatar;
 
     const avatarPreview = document.querySelector("#avatar-preview");
     if (avatarPreview && newAvatarUrl) {
@@ -116,7 +119,6 @@ async function handleAvatarChange(file) {
         JSON.stringify({
             ...currentUser,
             avatar: newAvatarUrl,
-            avatar_url: newAvatarUrl
         })
     );
 
@@ -155,14 +157,76 @@ async function handleAvatarChange(file) {
     }
 }
 
+function updateAllAvatarsOnPage(rawAvatarUrl) {
+    if (!rawAvatarUrl) return;
+
+    const cleanUrl = rawAvatarUrl.split("?")[0];
+    const freshUrl = `${cleanUrl}?t=${Date.now()}`;
+
+    const avatarPreview = document.querySelector("#avatar-preview");
+    if (avatarPreview) {
+        avatarPreview.src = freshUrl;
+    }
+
+    const navUserBtn = document.querySelector(".main-navbar .profile .user");
+    if (navUserBtn) {
+        let navAvatar = navUserBtn.querySelector("img");
+        if (!navAvatar) {
+            navUserBtn.innerHTML = `<img src="${freshUrl}" alt="Avatar" class="navbar-avatar" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;">`;
+        } else {
+            navAvatar.src = freshUrl;
+        }
+    }
+
+    const sidebarAvatar = document.querySelector("#sidebar-container img.sidebar-avatar");
+    if (sidebarAvatar) {
+        sidebarAvatar.src = freshUrl;
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem("current_user") || "{}");
+    localStorage.setItem(
+        "current_user",
+        JSON.stringify({
+            ...currentUser,
+            avatar: cleanUrl,
+        })
+    );
+}
+
 function setupProfile() {
     const profileForm = document.getElementById("profile-form");
     const avatarInput = document.getElementById("avatar");
+    const avatarPreview = document.getElementById("avatar-preview");
+    const oldAvatarSrc = avatarPreview ? avatarPreview.src : "";
 
     avatarInput?.addEventListener("change", async (event) => {
         const file = event.target.files[0];
-        if (file) {
-            await handleAvatarChange(file);
+        if (!file) return;
+
+        // Preview tạm thời tức thì bằng Blob URL
+        if (avatarPreview) {
+            avatarPreview.src = URL.createObjectURL(file);
+        }
+
+        try {
+            // Gọi API đổi avatar độc lập
+            const response = await changeAvatar(file);
+            const newAvatarUrl = response.avatar_url || response.avatar;
+
+            // Cập nhật ngay toàn bộ giao diện (Settings + Navbar)
+            updateAllAvatarsOnPage(newAvatarUrl);
+
+            showMessage("Cập nhật ảnh đại diện thành công.", "success");
+        } catch (error) {
+            console.error("Lỗi đổi avatar:", error);
+
+            // Rollback lại ảnh cũ nếu có lỗi
+            if (avatarPreview && oldAvatarSrc) {
+                avatarPreview.src = oldAvatarSrc;
+            }
+            showMessage(error.message || "Tải ảnh thất bại.", "error");
+        } finally {
+            // Reset input để có thể chọn lại cùng 1 file nếu cần
             avatarInput.value = "";
         }
     });

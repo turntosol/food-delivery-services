@@ -97,7 +97,7 @@ class LoginSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    avatar_url = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -109,9 +109,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "last_name",
             "phone",
             "avatar",
-            "avatar_url",
         ]
-        read_only_fields = ["id", "username", "email", "avatar_url"]
+        read_only_fields = ["id", "username", "email", "avatar"]
 
     def get_avatar_url(self, obj):
         if not obj.avatar:

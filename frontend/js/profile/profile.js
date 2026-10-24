@@ -68,10 +68,10 @@ async function loadProfile() {
             `@${profile.username || ""}`;
 
 
-        if (profile.avatar_url) {
+        if (profile.avatar) {
 
             document.querySelector("#profile-avatar").src =
-                profile.avatar_url;
+                profile.avatar;
 
         }
 
