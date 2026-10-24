@@ -56,140 +56,49 @@ document.addEventListener(
 // PROFILE
 // ==================================================
 
-    async function loadProfile() {
+async function loadProfile() {
+    try {
+        const profile = await getProfile();
+        console.log("Profile data from API:", profile); 
 
-        try {
+        const avatarPreview = document.querySelector("#avatar-preview");
 
-            // =====================================
-            // GET PROFILE FROM BACKEND
-            // =====================================
+        const avatarUrl = profile.avatar_url || profile.avatar;
 
-            const profile = await getProfile();
-
-            console.log(
-                "Profile from backend:",
-                profile
-            );
-
-
-            // =====================================
-            // GET UI ELEMENTS
-            // =====================================
-
-            const firstName =
-                document.querySelector("#first-name");
-
-            const lastName =
-                document.querySelector("#last-name");
-
-            const username =
-                document.querySelector("#username");
-
-            const email =
-                document.querySelector("#email");
-
-            const phone =
-                document.querySelector("#phone");
-
-            const avatar =
-                document.querySelector("#avatar-preview");
-
-
-            // =====================================
-            // DISPLAY PROFILE
-            // =====================================
-
-            if (firstName) {
-
-                firstName.value =
-                    profile.first_name || "";
-            }
-
-
-            if (lastName) {
-
-                lastName.value =
-                    profile.last_name || "";
-            }
-
-
-            if (username) {
-
-                username.value =
-                    profile.username || "";
-            }
-
-
-            if (email) {
-
-                email.value =
-                    profile.email || "";
-            }
-
-
-            if (phone) {
-
-                phone.value =
-                    profile.phone || "";
-            }
-
-
-            // =====================================
-            // DISPLAY AVATAR
-            // =====================================
-
-            if (
-                avatar &&
-                profile.avatar_url
-            ) {
-
-                avatar.src =
-                    profile.avatar_url;
-            }
-
-
-            // =====================================
-            // UPDATE LOCAL STORAGE
-            // =====================================
-
-            const currentUser =
-                JSON.parse(
-                    localStorage.getItem(
-                        "current_user"
-                    ) || "{}"
-                );
-
-
-            const updatedUser = {
-
-                ...currentUser,
-
-                ...profile
-            };
-
-
-            localStorage.setItem(
-                "current_user",
-                JSON.stringify(
-                    updatedUser
-                )
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "Error loading profile:",
-                error
-            );
-
-            showMessage(
-                error.message ||
-                "Failed to load profile.",
-                "error"
-            );
+        if (avatarPreview && avatarUrl) {
+            avatarPreview.src = `${avatarUrl}?t=${new Date().getTime()}`;
         }
+
+        if (document.querySelector("#first-name")) {
+            document.querySelector("#first-name").value = profile.first_name || "";
+        }
+        if (document.querySelector("#last-name")) {
+            document.querySelector("#last-name").value = profile.last_name || "";
+        }
+        if (document.querySelector("#username")) {
+            document.querySelector("#username").value = profile.username || "";
+        }
+        if (document.querySelector("#email")) {
+            document.querySelector("#email").value = profile.email || "";
+        }
+        if (document.querySelector("#phone")) {
+            document.querySelector("#phone").value = profile.phone || "";
+        }
+
+        const currentUser = JSON.parse(localStorage.getItem("current_user") || "{}");
+        localStorage.setItem(
+            "current_user",
+            JSON.stringify({
+                ...currentUser,
+                ...profile,
+                avatar: avatarUrl,
+                avatar_url: avatarUrl
+            })
+        );
+    } catch (error) {
+        console.error("Error loading profile:", error);
     }
+}
 
 
 async function handleAvatarChange(file) {
