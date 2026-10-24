@@ -276,15 +276,20 @@ class AccountViewSet(viewsets.ViewSet):
                 settings.SUPABASE_AVATAR_BUCKET
             ).get_public_url(file_name)
 
-            # Lưu link cloud vào database
-            user.avatar = avatar_url
-            user.updated_at = timezone.now()
-            user.save(update_fields=["avatar", "updated_at"])
+            current_time = timezone.now()
+        
+            User.objects.filter(id=user.id).update(
+                avatar=avatar_url,
+                updated_at=current_time
+            )
+
+            user.refresh_from_db()
 
             return Response(
                 {
                     "message": "Avatar updated successfully.",
-                    "avatar_url": avatar_url,
+                    "avatar_url": user.avatar if isinstance(user.avatar, str) else user.avatar.url,
+                    "updated_at": user.updated_at
                 },
                 status=status.HTTP_200_OK,
             )
