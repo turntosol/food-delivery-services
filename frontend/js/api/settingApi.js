@@ -18,6 +18,19 @@ export async function updateProfile(data) {
     );
 }
 
+export async function changeAvatar(file) {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    return await apiRequest(
+        "/account/profile/",
+        {
+            method: "PATCH",
+            body: formData
+        }
+    );
+}
+
 export async function getAddresses() {
 
     return await apiRequest(

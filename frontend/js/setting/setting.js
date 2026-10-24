@@ -1,6 +1,7 @@
 import {
     getProfile,
     updateProfile,
+    changeAvatar,
     getAddresses,
     createAddress,
     updateAddress,
@@ -189,112 +190,141 @@ document.addEventListener(
             );
         }
     }
+
+
+async function handleAvatarChange(file) {
+    if (!file) return;
+
+    // 1. Kiểm tra định dạng ảnh cho phép
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+        showMessage("Vui lòng chọn định dạng file JPG, PNG hoặc WEBP.", "error");
+        return;
+    }
+
+    // 2. Kiểm tra dung lượng (Max 5MB = 5 * 1024 * 1024 bytes)
+    const maxSizeBytes = 5 * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+        showMessage("Dung lượng ảnh vượt quá 5MB. Vui lòng chọn ảnh khác.", "error");
+        return;
+    }
+
+    const avatarPreview = document.querySelector("#avatar-preview");
+    const oldAvatarSrc = avatarPreview ? avatarPreview.src : null;
+
+    // 3. Preview tạm thời trên giao diện
+    if (avatarPreview) {
+        avatarPreview.src = URL.createObjectURL(file);
+    }
+
+    try {
+        // 4. Gọi API upload
+        const updatedProfile = await changeAvatar(file);
+
+        // 5. Cập nhật ảnh chính thức từ URL backend trả về
+        const newAvatarUrl = updatedProfile.avatar_url || updatedProfile.avatar;
+        if (avatarPreview && newAvatarUrl) {
+            avatarPreview.src = newAvatarUrl;
+        }
+
+        // 6. Đồng bộ vào localStorage
+        const currentUser = JSON.parse(
+            localStorage.getItem("current_user") || "{}"
+        );
+        localStorage.setItem(
+            "current_user",
+            JSON.stringify({
+                ...currentUser,
+                avatar: newAvatarUrl || currentUser.avatar,
+                avatar_url: newAvatarUrl || currentUser.avatar_url
+            })
+        );
+
+        showMessage("Cập nhật ảnh đại diện thành công.", "success");
+
+    } catch (error) {
+        console.error("Lỗi cập nhật avatar:", error);
+
+        // Phục hồi lại ảnh cũ nếu xảy ra lỗi
+        if (avatarPreview && oldAvatarSrc) {
+            avatarPreview.src = oldAvatarSrc;
+        }
+
+        showMessage(
+            error.message || "Không thể cập nhật ảnh đại diện.",
+            "error"
+        );
+    }
+}
+
 // ==================================================
 // PROFILE UPDATE
 // ==================================================
 
-    function setupProfile() {
-        const profileForm =
-            document.getElementById("profile-form");    
+function setupProfile() {
+    const profileForm = document.getElementById("profile-form");
+    const avatarInput = document.getElementById("avatar");
 
-        if (!profileForm) return;
+    // ==========================================
+    // LẮNG NGHE SỰ KIỆN ĐỔI AVATAR TỰ ĐỘNG
+    // ==========================================
+    avatarInput?.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            await handleAvatarChange(file);
+            // Reset input để có thể chọn lại cùng 1 file nếu vừa tải thất bại
+            avatarInput.value = "";
+        }
+    });
 
-        const avatarInput =
-            document.getElementById("avatar");
+    if (!profileForm) return;
 
-        const avatarPreview =
-            document.getElementById("avatar-preview");
+    // ==========================================
+    // LƯU THÔNG TIN CÁ NHÂN (TEXT FIELDS)
+    // ==========================================
+    profileForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-        // Preview avatar
-        avatarInput?.addEventListener("change", () => {
-            const file = avatarInput.files[0];
+        const formData = new FormData();
+        formData.append(
+            "first_name",
+            document.getElementById("first-name").value.trim()
+        );
+        formData.append(
+            "last_name",
+            document.getElementById("last-name").value.trim()
+        );
+        formData.append(
+            "phone",
+            document.getElementById("phone").value.trim()
+        );
 
-            if (!file) return;
+        try {
+            const profile = await updateProfile(formData);
 
-            const reader = new FileReader();
-
-            reader.onload = (event) => {
-                avatarPreview.src = event.target.result;
-            };
-
-            reader.readAsDataURL(file);
-        });
-
-        profileForm.addEventListener("submit", async (event) => {
-            event.preventDefault();
-
-            const formData = new FormData();
-
-            formData.append(
-                "first_name",
-                document.getElementById("first-name").value.trim()
+            const currentUser = JSON.parse(
+                localStorage.getItem("current_user") || "{}"
             );
 
-            formData.append(
-                "last_name",
-                document.getElementById("last-name").value.trim()
+            localStorage.setItem(
+                "current_user",
+                JSON.stringify({
+                    ...currentUser,
+                    ...profile
+                })
             );
 
-            formData.append(
-                "phone",
-                document.getElementById("phone").value.trim()
+            showMessage("Profile updated successfully.", "success");
+
+        } catch (error) {
+            console.error("Update profile error:", error);
+            showMessage(
+                error.message || "Failed to update profile.",
+                "error"
             );
-
-            // Add avatar if user selected a new file
-            if (
-                avatarInput &&
-                avatarInput.files &&
-                avatarInput.files.length > 0
-            ) {
-                formData.append(
-                    "avatar",
-                    avatarInput.files[0]
-                );
-            }
-
-            try {
-                const profile =
-                    await updateProfile(formData);
-
-                // Update avatar preview
-                if (profile.avatar_url) {
-                    avatarPreview.src =
-                        profile.avatar_url;
-                }
-
-                // Update local user data
-                const currentUser =
-                    JSON.parse(
-                        localStorage.getItem("current_user") || "{}"
-                    );
-
-                localStorage.setItem(
-                    "current_user",
-                    JSON.stringify({
-                        ...currentUser,
-                        ...profile
-                    })
-                );
-
-                showMessage(
-                    "Profile updated successfully.",
-                    "success"
-                );
-
-            } catch (error) {
-                console.error(
-                    "Update profile error:",
-                    error
-                );
-
-                showMessage(
-                    error.message ||
-                    "Failed to update profile.",
-                    "error"
-                );
-            }
-        });
-    }
+        }
+    });
+}
 // ==================================================
 // ADDRESS
 // ==================================================
