@@ -222,7 +222,7 @@ async function handleAvatarChange(file) {
         const updatedProfile = await changeAvatar(file);
 
         // 5. Cập nhật ảnh chính thức từ URL backend trả về
-        const newAvatarUrl = updatedProfile.avatar_url || updatedProfile.avatar;
+        const newAvatarUrl = updatedProfile.avatar;
         if (avatarPreview && newAvatarUrl) {
             avatarPreview.src = newAvatarUrl;
         }
@@ -236,7 +236,6 @@ async function handleAvatarChange(file) {
             JSON.stringify({
                 ...currentUser,
                 avatar: newAvatarUrl || currentUser.avatar,
-                avatar_url: newAvatarUrl || currentUser.avatar_url
             })
         );
 
