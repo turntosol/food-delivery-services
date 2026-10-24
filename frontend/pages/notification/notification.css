@@ -2,6 +2,16 @@
     display: flex; 
 }
 
+.main-navbar .profile {
+    margin-left: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 15px;
+}
+
 .notification-page {
     padding: 2rem;
 }
