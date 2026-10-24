@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth import get_user_model
 
 from rest_framework import (
@@ -6,6 +8,8 @@ from rest_framework import (
 )
 
 from rest_framework.decorators import action
+
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 
 from rest_framework.permissions import (
     AllowAny,
@@ -181,15 +185,10 @@ class AuthViewSet(
 
 
 class AccountViewSet(viewsets.ViewSet):
-
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
-    @action(
-        detail=False,
-        methods=["get", "patch"],
-        url_path="profile"
-    )
-
+    @action(detail=False, methods=["get", "patch"], url_path="profile")
     def profile(self, request):
         user = request.user
 
@@ -198,73 +197,114 @@ class AccountViewSet(viewsets.ViewSet):
                 user,
                 context={"request": request}
             )
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        if "avatar" in request.FILES and user.avatar:
+            user.avatar.delete(save=False)
 
         serializer = ProfileSerializer(
             user,
             data=request.data,
             partial=True,
-            context={"request": request}
+            context={"request": request},
         )
-
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        user.refresh_from_db()
 
-        serializer = ProfileSerializer(
+        user.refresh_from_db()
+        response_serializer = ProfileSerializer(
             user,
             context={"request": request}
         )
-        return Response(serializer.data)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     @action(
         detail=False,
-        methods=["get", "patch"],
-        url_path="settings"
+        methods=["patch", "post"],
+        url_path="change-avatar",
+        parser_classes=[MultiPartParser, FormParser],
     )
+    def change_avatar(self, request):
+        user = request.user
+        avatar_file = request.FILES.get("avatar")
 
+        if not avatar_file:
+            return Response(
+                {"avatar": ["Please upload image!"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        max_size = 5 * 1024 * 1024
+        if avatar_file.size > max_size:
+            return Response(
+                {"avatar": ["Dung lượng ảnh vượt quá 5MB. Vui lòng chọn ảnh khác."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        valid_extensions = [".jpg", ".jpeg", ".png", ".webp"]
+        ext = os.path.splitext(avatar_file.name)[1].lower()
+        if ext not in valid_extensions:
+            return Response(
+                {"avatar": ["Chỉ chấp nhận file ảnh có định dạng JPG, JPEG, PNG hoặc WEBP."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if user.avatar:
+            user.avatar.delete(save=False)
+
+        user.avatar = avatar_file
+        user.save(update_fields=["avatar", "updated_at"])
+
+        avatar_url = (
+            request.build_absolute_uri(user.avatar.url)
+            if user.avatar
+            else None
+        )
+
+        return Response(
+            {
+                "message": "Avatar updated successfully.",
+                "avatar_url": avatar_url,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=["get", "patch"], url_path="settings")
     def user_settings(self, request):
-        settings, created = UserSettings.objects.get_or_create(
+        settings_obj, _ = UserSettings.objects.get_or_create(
             user=request.user
         )
 
         if request.method == "GET":
-            serializer = UserSettingsSerializer(settings)
-            return Response(serializer.data)
+            serializer = UserSettingsSerializer(settings_obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         serializer = UserSettingsSerializer(
-            settings,
+            settings_obj,
             data=request.data,
-            partial=True
+            partial=True,
         )
-
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(
-        detail=False,
-        methods=["post"],
-        url_path="change-password"
-    )
-
+    @action(detail=False, methods=["post"], url_path="change-password")
     def change_password(self, request):
         serializer = ChangePasswordSerializer(
             data=request.data,
-            context={"request": request}
+            context={"request": request},
         )
-
         serializer.is_valid(raise_exception=True)
+
         user = request.user
-        user.set_password(
-            serializer.validated_data["new_password"]
-        )
+        user.set_password(serializer.validated_data["new_password"])
         user.save(update_fields=["password"])
 
-        return Response({
-            "message": "Password changed successfully."
-        })
+        return Response(
+            {"message": "Password changed successfully."},
+            status=status.HTTP_200_OK,
+        )
 
     
 class AddressViewSet(
