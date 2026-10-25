@@ -9,8 +9,7 @@ The system allows users to manage their shopping cart, place orders, view bills,
 FoodTime also provides an Admin Dashboard powered by Django Admin, allowing authorized administrators to manage application data through a web-based administration interface.
 
 ## Demo
-* **Frontend:** https://food-delivery-services.onrender.com
-* **Admin Dashboard:** https://backend-food-delivery-services.onrender.com/admin/
+https://food-delivery-services.onrender.com
 
 ## Features
 * **Authentication:** Sign up, login, and logout account.
