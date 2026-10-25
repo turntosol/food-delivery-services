@@ -15,25 +15,16 @@ document.addEventListener(
                 "access_token"
             );
 
-
         if (!accessToken) {
-
-            window.location.href =
-                "./pages/auth/login.html";
+            window.location.href = "./pages/auth/login.html";
 
             return;
-
         }
 
-
         await loadCategories();
-
         await loadFoods();
-
         await loadRecommendations();
-
         setupSearch();
-
     }
 );
 
