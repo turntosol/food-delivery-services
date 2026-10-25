@@ -21,7 +21,7 @@ FoodTime also provides an Admin Dashboard powered by Django Admin, allowing auth
 * **Notification:** Receive order and wallet notifications and manage notification settings.
 * **Contact:** View FoodTime contact information and send messages.
 * **Account:** Update profile, manage delivery addresses, change password, manage notifications, and logout.
-* **Admin Dashboard: Access the Django administration panel to manage registered application data, depending on the administrator's permissions and the models registered in Django Admin.
+* **Admin Dashboard:** Access the Django administration panel to manage registered application data, depending on the administrator's permissions and the models registered in Django Admin.
 
 ## Technologies
 
@@ -62,6 +62,7 @@ Navigate to the backend directory:
 
 ```bash
 cd backend
+```
 
 Create and activate a virtual environment:
 
