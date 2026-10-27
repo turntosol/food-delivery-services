@@ -6,9 +6,10 @@ FoodTime is a web-based food delivery system developed to provide users with a c
 
 The system allows users to manage their shopping cart, place orders, view bills, manage their wallet, receive notifications, contact FoodTime, and manage their personal account.
 
-## Demo
+FoodTime also provides an Admin Dashboard powered by Django Admin, allowing authorized administrators to manage application data through a web-based administration interface.
 
-Live Demo: https://food-delivery-services.onrender.com
+## Demo
+https://food-delivery-services.onrender.com
 
 ## Features
 * **Authentication:** Sign up, login, and logout account.
@@ -19,25 +20,26 @@ Live Demo: https://food-delivery-services.onrender.com
 * **Notification:** Receive order and wallet notifications and manage notification settings.
 * **Contact:** View FoodTime contact information and send messages.
 * **Account:** Update profile, manage delivery addresses, change password, manage notifications, and logout.
+* **Admin Dashboard:** Access the Django administration panel to manage registered application data, depending on the administrator's permissions and the models registered in Django Admin.
 
 ## Technologies
 
 ### Frontend
-
 * HTML5
 * CSS3
 * JavaScript
 
 ### Backend
-
 * Python
 * Django
 * Django REST Framework
 
 ### Database
-
 * PostgreSQL
 * Supabase
+
+### Deployment
+* Render
 
 ## Setup
 
@@ -59,6 +61,7 @@ Navigate to the backend directory:
 
 ```bash
 cd backend
+```
 
 Create and activate a virtual environment:
 
@@ -86,6 +89,12 @@ Run database migrations:
 python manage.py migrate
 ```
 
+Create an administrator account:
+
+```bash
+python manage.py createsuperuser
+```
+
 Start the Django development server:
 
 ```bash
@@ -94,6 +103,12 @@ python manage.py runserver
 
 The backend API will be available at:
 
-```text
+```bash
 http://127.0.0.1:8000/
+```
+
+After starting the backend, open the following URL in your browser:
+
+```bash
+http://127.0.0.1:8000/admin/
 ```
