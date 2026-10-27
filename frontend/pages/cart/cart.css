@@ -1,7 +1,20 @@
+.main-navbar {
+    display: flex; 
+}
+
+.main-navbar .profile {
+    margin-left: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 15px;
+}
+
 .cart-page {
     padding: 2%;
 }
-
 
 .cart-header {
     display: flex;
@@ -11,13 +24,11 @@
     margin-bottom: 25px;
 }
 
-
 .cart-subtitle {
     margin-top: 5px;
     color: var(--darkGreyColor);
     font-size: 14px;
 }
-
 
 .clear-cart-btn {
     border: none;
